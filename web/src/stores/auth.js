@@ -10,10 +10,20 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(username, password) {
     try {
       const response = await authApi.login({ username, password })
-      token.value = response.access_token
-      isAuthenticated.value = true
-      localStorage.setItem('token', response.access_token)
-      return true
+      
+      if (response && response.access_token) {
+        token.value = response.access_token
+        isAuthenticated.value = true
+        localStorage.setItem('token', response.access_token)
+        
+        if (response.user) {
+          user.value = response.user
+        }
+        
+        return true
+      }
+      
+      return false
     } catch (error) {
       console.error('Login failed:', error)
       return false

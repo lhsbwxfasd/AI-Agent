@@ -26,7 +26,7 @@ class AuthService:
                 "hashed_password": self.get_password_hash("admin123"),
                 "id": 1,
                 "is_active": True,
-                "preferred_model": "gpt-4"
+                "preferred_model": "deepseek-chat"
             }
         }
     
@@ -90,10 +90,20 @@ class AuthService:
         
         access_token = self.create_access_token(data={"sub": user.username})
         logger.info(f"User {username} logged in successfully")
+        
+        # 返回用户信息（不包含密码）
+        user_info = {
+            "username": user.username,
+            "email": user.email,
+            "id": user.id,
+            "is_active": user.is_active,
+            "preferred_model": user.preferred_model
+        }
+        
         return {
             "access_token": access_token,
             "token_type": "bearer",
-            "user": user
+            "user": user_info
         }
     
     def update_user_preferred_model(self, username: str, preferred_model: str) -> Optional[User]:
@@ -109,7 +119,7 @@ class AuthService:
         user = self.get_user(username)
         if user:
             return user.preferred_model
-        return "gpt-4"  # 默认模型
+        return "deepseek-chat"
 
 
 auth_service = AuthService()

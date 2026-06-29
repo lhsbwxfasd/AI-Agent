@@ -32,7 +32,7 @@ async def list_models():
         models = llm_service.get_available_models()
         return {
             "models": models,
-            "default": "gpt-4"
+            "default": "deepseek-chat"
         }
     except Exception as e:
         logger.error(f"Error listing models: {str(e)}")

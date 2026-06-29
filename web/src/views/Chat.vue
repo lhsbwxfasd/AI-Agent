@@ -69,7 +69,7 @@
           >
             <div class="message-avatar">
               <el-icon v-if="message.role === 'user'"><User /></el-icon>
-              <el-icon v-else><Robot /></el-icon>
+              <el-icon v-else><Service /></el-icon>
             </div>
             <div class="message-content">
               <div class="message-text" v-html="formatMessage(message.content)"></div>
@@ -78,7 +78,7 @@
           
           <div v-if="chatStore.isLoading" class="message assistant">
             <div class="message-avatar">
-              <el-icon><Robot /></el-icon>
+              <el-icon><Service /></el-icon>
             </div>
             <div class="message-content">
               <div class="message-text">
@@ -122,7 +122,7 @@ import {
   Plus,
   ChatDotRound,
   User,
-  Robot,
+  Service,
   Loading
 } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
@@ -286,12 +286,27 @@ function handleCommand(command) {
 }
 
 onMounted(async () => {
-  await chatStore.loadModels()
-  await loadConversations()
+  try {
+    await chatStore.loadModels()
+  } catch (error) {
+    console.error('Failed to load models:', error)
+    ElMessage.warning('加载模型列表失败，使用默认模型')
+  }
   
-  // Create initial conversation if none exists
+  try {
+    await loadConversations()
+  } catch (error) {
+    console.error('Failed to load conversations:', error)
+    ElMessage.warning('加载会话列表失败')
+  }
+  
   if (conversations.value.length === 0) {
-    await handleNewChat()
+    try {
+      await handleNewChat()
+    } catch (error) {
+      console.error('Failed to create initial conversation:', error)
+      ElMessage.error('创建初始对话失败，请刷新页面重试')
+    }
   }
 })
 

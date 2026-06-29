@@ -19,8 +19,9 @@ class UserLogin(BaseModel):
 
 class User(UserBase):
     id: int = Field(..., description="用户 ID")
+    hashed_password: str = Field(..., description="密码哈希")
     is_active: bool = Field(default=True, description="是否激活")
-    preferred_model: str = Field(default="gpt-4", description="偏好模型")
+    preferred_model: str = Field(default="deepseek-chat", description="偏好模型")
     created_at: datetime = Field(default_factory=datetime.utcnow, description="创建时间")
     
     class Config:

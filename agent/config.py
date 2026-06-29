@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     default_temperature: float = 0.7
     max_tokens: int = 2000
     
+    # DeepSeek 配置（兼容字段）
+    deepseek_api_key: Optional[str] = None
+    deepseek_base_url: str = "https://api.deepseek.com"
+    
     # 多模型配置
     available_models: Dict[str, Dict] = {
         "deepseek-chat": {"name": "DeepSeek Chat", "provider": "deepseek", "max_tokens": 4096},
