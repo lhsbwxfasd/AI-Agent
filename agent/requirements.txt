@@ -1,0 +1,43 @@
+# Web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Async support
+httpx==0.25.2
+aiohttp==3.9.1
+
+# LLM integration
+langchain==0.1.0
+langchain-openai==0.0.2
+langchain-community==0.0.10
+openai==1.6.1
+
+# Vector database - Python 3.10 完全兼容
+chromadb==0.4.22
+sentence-transformers==2.3.1
+duckdb==0.9.1
+hnswlib==0.8.0
+
+# MCP support
+# mcp==0.1.0  # Commented out, uncomment if needed
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.0.1  # 兼容 passlib 1.7.4
+python-multipart==0.0.6
+email-validator==2.1.0  # pydantic EmailStr 验证需要
+
+# Utilities
+loguru==0.7.2
+python-dotenv==1.0.0
+tenacity==8.2.3
+
+# Monitoring
+prometheus-client==0.19.0
+
+# File parsing
+PyPDF2==3.0.1
+python-docx==1.1.0
