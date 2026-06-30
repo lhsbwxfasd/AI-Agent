@@ -22,16 +22,28 @@ class LLMService:
         # 从缓存获取或创建新实例
         if model_name not in self.llm_cache:
             model_config = settings.available_models[model_name]
+            provider = model_config.get("provider", "openai")
+            
+            # 根据 provider 确定 base_url 和 api_key
+            if provider == "ollama":
+                base_url = settings.ollama_base_url
+                api_key = "ollama"  # Ollama 不需要真实 API key
+            elif provider == "deepseek":
+                base_url = settings.deepseek_base_url
+                api_key = settings.deepseek_api_key or settings.openai_api_key
+            else:
+                base_url = settings.openai_base_url
+                api_key = settings.openai_api_key
             
             self.llm_cache[model_name] = ChatOpenAI(
                 model=model_name,
                 temperature=settings.default_temperature,
                 max_tokens=model_config.get("max_tokens", settings.max_tokens),
-                openai_api_key=settings.openai_api_key,
-                openai_api_base=settings.openai_base_url,
+                openai_api_key=api_key,
+                openai_api_base=base_url,
                 streaming=True
             )
-            logger.info(f"Created LLM instance for model: {model_name}")
+            logger.info(f"Created LLM instance for model: {model_name}, provider: {provider}, base_url: {base_url}")
         
         return self.llm_cache[model_name]
     

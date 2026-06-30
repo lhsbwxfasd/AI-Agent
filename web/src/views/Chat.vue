@@ -72,7 +72,7 @@
               <el-icon v-else><Service /></el-icon>
             </div>
             <div class="message-content">
-              <div class="message-text" v-html="formatMessage(message.content)"></div>
+              <MarkdownRenderer :content="message.content" />
             </div>
           </div>
           
@@ -129,9 +129,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { chatApi } from '@/api/chat'
 import { conversationApi } from '@/api/conversation'
-import { marked } from 'marked'
-import hljs from 'highlight.js'
-import 'highlight.js/styles/github-dark.css'
+import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -140,20 +138,6 @@ const chatStore = useChatStore()
 const inputMessage = ref('')
 const messagesContainer = ref(null)
 const conversations = ref([])
-
-// Configure marked
-marked.setOptions({
-  highlight: function(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      return hljs.highlight(code, { language: lang }).value
-    }
-    return hljs.highlightAuto(code).value
-  }
-})
-
-function formatMessage(content) {
-  return marked(content || '')
-}
 
 function scrollToBottom() {
   nextTick(() => {
@@ -428,35 +412,6 @@ watch(() => chatStore.messages, () => {
   border-radius: 12px 12px 12px 0;
   padding: 12px 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.message-text {
-  line-height: 1.6;
-  word-wrap: break-word;
-}
-
-.message-text :deep(pre) {
-  background-color: #2d2d2d;
-  padding: 12px;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin: 8px 0;
-}
-
-.message-text :deep(code) {
-  font-family: 'Courier New', monospace;
-  background-color: #f0f0f0;
-  padding: 2px 4px;
-  border-radius: 3px;
-}
-
-.message-text :deep(pre code) {
-  background-color: transparent;
-  padding: 0;
-}
-
-.message-text :deep(p) {
-  margin: 8px 0;
 }
 
 .chat-input {

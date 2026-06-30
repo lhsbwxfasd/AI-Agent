@@ -22,10 +22,14 @@ class Settings(BaseSettings):
     deepseek_api_key: Optional[str] = None
     deepseek_base_url: str = "https://api.deepseek.com"
     
+    # Ollama 配置（本地模型）
+    ollama_base_url: str = "http://localhost:11434/v1"
+    
     # 多模型配置
     available_models: Dict[str, Dict] = {
         "deepseek-chat": {"name": "DeepSeek Chat", "provider": "deepseek", "max_tokens": 4096},
         "deepseek-coder": {"name": "DeepSeek Coder", "provider": "deepseek", "max_tokens": 4096},
+        "deepseek-r1:7b": {"name": "DeepSeek R1 7B (Ollama)", "provider": "ollama", "max_tokens": 4096},
         "gpt-4": {"name": "GPT-4", "provider": "openai", "max_tokens": 8192},
         "gpt-3.5-turbo": {"name": "GPT-3.5 Turbo", "provider": "openai", "max_tokens": 4096},
         "claude-3-opus": {"name": "Claude 3 Opus", "provider": "anthropic", "max_tokens": 4096},
