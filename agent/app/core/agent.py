@@ -3,6 +3,7 @@ from app.core.llm import llm_service
 from app.services.knowledge_service import knowledge_service
 from app.services.mcp_service import mcp_service
 from app.services.conversation_service import conversation_service
+from app.core.chart_processor import chart_detector, chart_generator
 from loguru import logger
 import re
 import json
@@ -161,6 +162,9 @@ TOOL_CALL: tool_name|param1=value1|param2=value2
                     model=model
                 )
         
+        # 检查是否需要生成图表
+        response = await self._process_chart_request(user_message, response)
+        
         return response
     
     async def process_stream(
@@ -224,7 +228,48 @@ TOOL_CALL: tool_name|param1=value1|param2=value2
                     system_prompt=enhanced_system,
                     model=model
                 ):
+                    full_response += chunk
                     yield chunk
+        
+        # 检查是否需要生成图表（流式响应结束后处理）
+        is_chart_request, chart_type, data_description = chart_detector.detect_chart_request(user_message)
+        
+        if is_chart_request:
+            chart_markdown = chart_generator.generate_chart(
+                chart_type=chart_type,
+                data_description=data_description,
+                raw_response=full_response
+            )
+            
+            if chart_markdown:
+                yield f"\n\n{chart_markdown}"
+                logger.info(f"Generated chart for stream request: {chart_type}")
+    
+    async def _process_chart_request(self, user_message: str, response: str) -> str:
+        """处理图表请求"""
+        try:
+            is_chart_request, chart_type, data_description = chart_detector.detect_chart_request(user_message)
+            
+            if not is_chart_request:
+                return response
+            
+            chart_markdown = chart_generator.generate_chart(
+                chart_type=chart_type,
+                data_description=data_description,
+                raw_response=response
+            )
+            
+            if not chart_markdown:
+                return response
+            
+            enhanced_response = f"{response}\n\n{chart_markdown}"
+            
+            logger.info(f"Generated chart for request: {chart_type}")
+            return enhanced_response
+            
+        except Exception as e:
+            logger.error(f"Error processing chart request: {str(e)}")
+            return response
 
 
 agent = Agent()
