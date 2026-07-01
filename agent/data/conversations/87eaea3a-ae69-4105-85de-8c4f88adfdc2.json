@@ -1,1 +1,0 @@
-{"id": "87eaea3a-ae69-4105-85de-8c4f88adfdc2", "user_id": "admin", "title": "请提取出附件中的内容", "model": "deepseek-chat", "messages": [{"role": "user", "content": "请提取出附件中的内容", "timestamp": "2026-07-01 02:13:49.504943"}], "summary": null, "created_at": "2026-07-01 02:13:49.489948", "updated_at": "2026-07-01 02:13:49.504943"}
