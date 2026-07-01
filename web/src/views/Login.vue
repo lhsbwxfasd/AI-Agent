@@ -50,7 +50,7 @@
       </el-form>
       
       <div class="login-footer">
-        <p>默认账号: admin / admin123</p>
+        <p>没有账号？<router-link to="/register">立即注册</router-link></p>
       </div>
     </el-card>
   </div>
@@ -146,6 +146,15 @@ async function handleLogin() {
 .login-footer p {
   margin: 0;
   color: #909399;
-  font-size: 12px;
+  font-size: 14px;
+}
+
+.login-footer a {
+  color: #409eff;
+  text-decoration: none;
+}
+
+.login-footer a:hover {
+  text-decoration: underline;
 }
 </style>

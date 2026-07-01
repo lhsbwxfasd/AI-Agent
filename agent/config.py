@@ -64,6 +64,31 @@ class Settings(BaseSettings):
     cors_allow_methods: List[str] = ["*"]
     cors_allow_headers: List[str] = ["*"]
     
+    # 数据库配置
+    db_type: str = "sqlite"  # sqlite 或 mysql
+    db_host: str = "localhost"
+    db_port: int = 3306
+    db_user: str = "webuser"
+    db_password: str = "Webuser@123"
+    db_database: str = "safedb"
+    db_sqlite_path: str = "./data/db.sqlite3"
+    
+    @property
+    def database_url(self) -> str:
+        """获取数据库连接 URL"""
+        if self.db_type == "mysql":
+            return f"mysql+aiomysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_database}"
+        else:
+            return f"sqlite+aiosqlite:///{self.db_sqlite_path}"
+    
+    @property
+    def sync_database_url(self) -> str:
+        """获取同步数据库连接 URL（用于初始化）"""
+        if self.db_type == "mysql":
+            return f"mysql+pymysql://{self.db_user}:{self.db_password}@{self.db_host}:{self.db_port}/{self.db_database}"
+        else:
+            return f"sqlite:///{self.db_sqlite_path}"
+    
     class Config:
         env_file = ".env"
         case_sensitive = False

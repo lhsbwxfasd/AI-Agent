@@ -13,12 +13,13 @@ os.environ['HUGGINGFACE_HUB_CACHE'] = os.path.expanduser('~/.cache/huggingface/h
 # 修复 sqlite3 版本问题（必须在导入 chromadb 之前）
 from app.utils.sqlite3_patch import *
 
-from app.api import chat, knowledge, auth, conversation, attachment
+from app.api import chat, knowledge, auth, conversation, attachment, users
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.auth import AuthMiddleware
 from app.utils.logger import setup_logger
 from app.services.mcp_service import mcp_service
 from app.services.knowledge_service import knowledge_service
+from app.db.database import db_manager
 from config import settings
 
 
@@ -26,6 +27,14 @@ from config import settings
 async def lifespan(app: FastAPI):
     # 启动时执行
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    
+    # 初始化数据库
+    try:
+        await db_manager.initialize()
+        logger.info("Database initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {str(e)}")
+        raise
     
     # 异步初始化知识库服务
     try:
@@ -45,6 +54,13 @@ async def lifespan(app: FastAPI):
         logger.info("MCP service closed")
     except Exception as e:
         logger.error(f"Error closing MCP service: {str(e)}")
+    
+    # 关闭数据库连接
+    try:
+        await db_manager.close()
+        logger.info("Database connection closed")
+    except Exception as e:
+        logger.error(f"Error closing database: {str(e)}")
 
 
 def create_app() -> FastAPI:
@@ -69,6 +85,7 @@ def create_app() -> FastAPI:
     
     # 注册路由
     app.include_router(auth.router, prefix="/api/v1/auth", tags=["认证"])
+    app.include_router(users.router, prefix="/api/v1/users", tags=["用户管理"])
     app.include_router(chat.router, prefix="/api/v1/chat", tags=["聊天"])
     app.include_router(knowledge.router, prefix="/api/v1/knowledge", tags=["知识库"])
     app.include_router(conversation.router, prefix="/api/v1/conversations", tags=["会话管理"])
