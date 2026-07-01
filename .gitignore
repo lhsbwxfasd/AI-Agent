@@ -129,3 +129,5 @@ ENV/
 
 
 /agent/.env
+/agent/data/attachments/2a12bbdf-a7f1-4240-8d03-cbe0c9c22f55.png
+/agent/data/attachments/4ad513a9-cb5b-4078-8014-3f50bee2ce49.png

@@ -4,20 +4,15 @@ from loguru import logger
 
 from app.models.conversation import Conversation, ConversationCreate, ConversationUpdate, ConversationList
 from app.services.conversation_service import conversation_service
+from app.middleware.auth import get_current_user_id
 
 router = APIRouter()
-
-
-async def get_current_user() -> str:
-    """获取当前用户（简化版，实际应从JWT token中获取）"""
-    # 这里应该从 request.state.user 获取，简化处理返回默认用户
-    return "admin"
 
 
 @router.post("/", response_model=Conversation)
 async def create_conversation(
     conversation_data: ConversationCreate,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """创建新会话"""
     try:
@@ -35,7 +30,7 @@ async def create_conversation(
 async def list_conversations(
     limit: int = 20,
     offset: int = 0,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """获取用户的所有会话"""
     try:
@@ -58,7 +53,7 @@ async def list_conversations(
 @router.get("/{conversation_id}", response_model=Conversation)
 async def get_conversation(
     conversation_id: str,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """获取指定会话"""
     try:
@@ -82,7 +77,7 @@ async def get_conversation(
 async def update_conversation(
     conversation_id: str,
     update_data: ConversationUpdate,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """更新会话"""
     try:
@@ -109,7 +104,7 @@ async def update_conversation(
 @router.delete("/{conversation_id}")
 async def delete_conversation(
     conversation_id: str,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """删除会话"""
     try:
@@ -137,7 +132,7 @@ async def delete_conversation(
 async def get_conversation_messages(
     conversation_id: str,
     max_history: int = None,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """获取会话的消息历史"""
     try:

@@ -106,3 +106,72 @@ async def get_current_user_id(request: Request) -> str:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token"
         )
+
+
+async def get_current_user_role(request: Request) -> tuple:
+    """获取当前用户ID和角色"""
+    authorization = request.headers.get("Authorization")
+    
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authorization header"
+        )
+    
+    try:
+        scheme, token = authorization.split()
+        if scheme.lower() != "bearer":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication scheme"
+            )
+        
+        # 解码 token
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        user_id = payload.get("sub")
+        username = payload.get("username")
+        
+        if not user_id:
+            raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token"
+        )
+        
+        # 查询用户是否是管理员
+        from app.db.database import db_manager, UserModel
+        from sqlalchemy import select
+        
+        async with db_manager.get_session() as session:
+            result = await session.execute(
+                select(UserModel).where(UserModel.id == user_id)
+            )
+            user = result.scalar_one_or_none()
+            
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="User not found"
+                )
+            
+            is_admin = bool(user.is_admin)
+        
+        return user_id, is_admin
+        
+    except (ValueError, JWTError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token"
+        )
+
+
+async def require_admin(request: Request) -> str:
+    """要求管理员权限"""
+    user_id, is_admin = await get_current_user_role(request)
+    
+    if not is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    
+    return user_id

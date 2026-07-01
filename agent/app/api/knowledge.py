@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Depends
 from typing import List, Optional
 import PyPDF2
 import docx
 from io import BytesIO
 
 from app.services.knowledge_service import knowledge_service
+from app.middleware.auth import require_admin
 from loguru import logger
 
 router = APIRouter()
@@ -14,7 +15,8 @@ router = APIRouter()
 async def add_document(
     content: str,
     metadata: Optional[dict] = None,
-    doc_id: Optional[str] = None
+    doc_id: Optional[str] = None,
+    user_id: str = Depends(require_admin)
 ):
     """添加文本文档"""
     try:
@@ -30,7 +32,10 @@ async def add_document(
 
 
 @router.post("/documents/batch")
-async def add_documents_batch(documents: List[dict]):
+async def add_documents_batch(
+    documents: List[dict],
+    user_id: str = Depends(require_admin)
+):
     """批量添加文档"""
     try:
         contents = [doc["content"] for doc in documents]
@@ -51,7 +56,8 @@ async def add_documents_batch(documents: List[dict]):
 @router.post("/documents/upload")
 async def upload_document(
     file: UploadFile = File(...),
-    source: Optional[str] = None
+    source: Optional[str] = None,
+    user_id: str = Depends(require_admin)
 ):
     """上传文件并添加到知识库"""
     try:
@@ -82,7 +88,10 @@ async def upload_document(
 
 
 @router.delete("/documents")
-async def delete_documents(ids: List[str]):
+async def delete_documents(
+    ids: List[str],
+    user_id: str = Depends(require_admin)
+):
     """删除文档"""
     try:
         result = await knowledge_service.delete_documents(ids)
@@ -93,7 +102,9 @@ async def delete_documents(ids: List[str]):
 
 
 @router.get("/info")
-async def get_knowledge_info():
+async def get_knowledge_info(
+    user_id: str = Depends(require_admin)
+):
     """获取知识库信息"""
     try:
         result = await knowledge_service.get_collection_info()

@@ -35,7 +35,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="conversations">会话管理</el-dropdown-item>
-                <el-dropdown-item command="knowledge">知识库</el-dropdown-item>
+                <el-dropdown-item v-if="authStore.isAdmin" command="knowledge">知识库</el-dropdown-item>
                 <el-dropdown-item command="logout" divided>退出登录</el-dropdown-item>
               </el-dropdown-menu>
             </template>

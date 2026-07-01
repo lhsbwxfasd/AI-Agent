@@ -10,14 +10,10 @@ from app.core.llm import llm_service
 from app.core.streaming import stream_formatter
 from app.services.conversation_service import conversation_service
 from app.services.auth_service import auth_service
+from app.middleware.auth import get_current_user_id
 from loguru import logger
 
 router = APIRouter()
-
-
-async def get_current_user() -> str:
-    """获取当前用户（简化版，实际应从JWT token中获取）"""
-    return "admin"
 
 
 async def get_user_preferred_model(user_id: str) -> str:
@@ -42,7 +38,7 @@ async def list_models():
 @router.post("/completions")
 async def chat_completion(
     request: ChatRequest,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """聊天完成接口（非流式）"""
     try:
@@ -116,7 +112,7 @@ async def chat_completion(
 @router.post("/completions/stream")
 async def chat_completion_stream(
     request: ChatRequest,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """聊天完成接口（流式）"""
     try:

@@ -1,18 +1,15 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from typing import List
 from app.services.attachment_service import attachment_service
+from app.middleware.auth import get_current_user_id
 from loguru import logger
 
 router = APIRouter()
 
-async def get_current_user() -> str:
-    """获取当前用户（简化版）"""
-    return "admin"
-
 @router.post("/upload")
 async def upload_attachment(
     file: UploadFile = File(...),
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """上传附件并解析内容"""
     try:
@@ -42,7 +39,7 @@ async def upload_attachment(
 @router.post("/upload/multiple")
 async def upload_multiple_attachments(
     files: List[UploadFile] = File(...),
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """批量上传附件"""
     try:
@@ -75,7 +72,7 @@ async def upload_multiple_attachments(
 @router.delete("/{attachment_id}")
 async def delete_attachment(
     attachment_id: str,
-    current_user: str = Depends(get_current_user)
+    current_user: str = Depends(get_current_user_id)
 ):
     """删除附件"""
     try:
