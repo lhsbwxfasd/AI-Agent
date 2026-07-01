@@ -187,6 +187,17 @@ class ConversationService:
             if not conv_model:
                 return None
             
+            # 如果是用户消息，检查是否需要更新标题（第一条消息）
+            should_update_title = False
+            if role == "user":
+                # 查询已有消息数量（不包括即将添加的这条）
+                msg_count_result = await session.execute(
+                    select(MessageModel).where(MessageModel.conversation_id == conversation_id)
+                )
+                existing_msg_count = len(msg_count_result.scalars().all())
+                if existing_msg_count == 0:
+                    should_update_title = True
+            
             # 准备附件数据
             attachments_json = None
             if attachments:
@@ -213,13 +224,9 @@ class ConversationService:
             conv_model.updated_at = datetime.utcnow()
             
             # 如果是第一条用户消息，更新标题
-            if role == "user":
-                msg_count_result = await session.execute(
-                    select(MessageModel).where(MessageModel.conversation_id == conversation_id)
-                )
-                msg_count = len(msg_count_result.scalars().all())
-                if msg_count == 0:  # 这是第一条消息（还没commit）
-                    conv_model.title = content[:50] + "..." if len(content) > 50 else content
+            if should_update_title:
+                conv_model.title = content[:50] + "..." if len(content) > 50 else content
+                logger.info(f"Updated conversation title to: {conv_model.title}")
             
             await session.commit()
             
