@@ -64,5 +64,30 @@ export const chatApi = {
     } catch (error) {
       onError(error)
     }
+  },
+  
+  // Upload attachment
+  async uploadAttachment(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    const authStore = useAuthStore()
+    const headers = {}
+    if (authStore.token) {
+      headers.Authorization = `Bearer ${authStore.token}`
+    }
+    
+    const response = await fetch('/api/v1/attachments/upload', {
+      method: 'POST',
+      headers,
+      body: formData
+    })
+    
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.detail || 'Upload failed')
+    }
+    
+    return response.json()
   }
 }

@@ -123,14 +123,33 @@ class ConversationService:
         self,
         conversation_id: str,
         role: str,
-        content: str
+        content: str,
+        attachments: Optional[List[Dict]] = None
     ) -> Optional[Conversation]:
         """添加消息到会话"""
         conversation = self.conversations.get(conversation_id)
         if not conversation:
             return None
         
-        message = Message(role=role, content=content)
+        # 处理附件
+        message_attachments = None
+        if attachments:
+            from app.models.conversation import MessageAttachment
+            message_attachments = [
+                MessageAttachment(
+                    id=att.get('id', ''),
+                    filename=att.get('filename', ''),
+                    content_type=att.get('content_type', ''),
+                    size=att.get('size', 0)
+                )
+                for att in attachments
+            ]
+        
+        message = Message(
+            role=role, 
+            content=content,
+            attachments=message_attachments
+        )
         conversation.messages.append(message)
         conversation.updated_at = datetime.utcnow()
         
@@ -167,10 +186,23 @@ class ConversationService:
         if not conversation:
             return []
         
-        messages = [
-            {"role": msg.role, "content": msg.content}
-            for msg in conversation.messages
-        ]
+        messages = []
+        for msg in conversation.messages:
+            msg_dict = {"role": msg.role, "content": msg.content}
+            
+            # 如果有附件，也包含附件信息
+            if msg.attachments:
+                msg_dict["attachments"] = [
+                    {
+                        "id": att.id,
+                        "filename": att.filename,
+                        "content_type": att.content_type,
+                        "size": att.size
+                    }
+                    for att in msg.attachments
+                ]
+            
+            messages.append(msg_dict)
         
         # 如果设置了最大历史数，进行截断
         if max_history and len(messages) > max_history:

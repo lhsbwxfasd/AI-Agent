@@ -4,7 +4,7 @@ import { chatApi } from '@/api/chat'
 
 export const useChatStore = defineStore('chat', () => {
   const models = ref([])
-  const currentModel = ref('deepseek-chat')
+  const currentModel = ref('deepseek-r1:7b')
   const currentConversationId = ref(null)
   const messages = ref([])
   const isLoading = ref(false)
@@ -13,7 +13,7 @@ export const useChatStore = defineStore('chat', () => {
     try {
       const response = await chatApi.getModels()
       models.value = response.models
-      currentModel.value = response.default || 'deepseek-chat'
+      currentModel.value = response.default || 'deepseek-r1:7b'
     } catch (error) {
       console.error('Load models failed:', error)
     }

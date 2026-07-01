@@ -2,9 +2,18 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 
 
+class Attachment(BaseModel):
+    id: str = Field(..., description="附件ID")
+    filename: str = Field(..., description="文件名")
+    content_type: str = Field(..., description="文件类型")
+    size: int = Field(..., description="文件大小")
+    parsed_content: Optional[str] = Field(default=None, description="解析后的内容")
+
+
 class Message(BaseModel):
     role: str = Field(..., description="消息角色：user/assistant/system")
     content: str = Field(..., description="消息内容")
+    attachments: Optional[List[Attachment]] = Field(default=None, description="附件列表")
 
 
 class ChatRequest(BaseModel):

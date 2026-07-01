@@ -16,6 +16,7 @@ class Agent:
 1. 可以回答用户的各种问题
 2. 可以检索企业知识库获取相关信息
 3. 可以调用外部工具（通过 MCP）执行任务
+4. 可以理解和分析用户上传的附件内容（PDF、Word、图片等）
 
 当需要调用工具时，请使用以下格式：
 TOOL_CALL: tool_name|param1=value1|param2=value2
@@ -24,6 +25,31 @@ TOOL_CALL: tool_name|param1=value1|param2=value2
         
         # 对话摘要提示
         self.summary_prompt = """请将以下对话内容总结为一个简洁的摘要，保留关键信息和上下文，以便后续对话能够基于这个摘要继续进行。"""
+    
+    def _process_attachments(self, messages: List[Dict]) -> List[Dict]:
+        """处理消息中的附件，将附件内容添加到消息中"""
+        processed_messages = []
+        
+        for msg in messages:
+            processed_msg = {
+                "role": msg["role"],
+                "content": msg["content"]
+            }
+            
+            # 如果消息包含附件，将附件内容添加到消息中
+            if "attachments" in msg and msg["attachments"]:
+                attachment_contents = []
+                for attachment in msg["attachments"]:
+                    if "parsed_content" in attachment and attachment["parsed_content"]:
+                        attachment_contents.append(attachment["parsed_content"])
+                
+                if attachment_contents:
+                    attachment_text = "\n\n".join(attachment_contents)
+                    processed_msg["content"] = f"{msg['content']}\n\n[附件内容]\n{attachment_text}"
+            
+            processed_messages.append(processed_msg)
+        
+        return processed_messages
     
     async def _summarize_conversation(self, messages: List[Dict[str, str]]) -> str:
         """生成对话摘要"""
@@ -109,6 +135,9 @@ TOOL_CALL: tool_name|param1=value1|param2=value2
         model: Optional[str] = None
     ) -> str:
         """处理用户消息（非流式）"""
+        # 处理附件
+        messages = self._process_attachments(messages)
+        
         user_message = messages[-1]["content"] if messages else ""
         
         # 处理长对话
@@ -177,6 +206,9 @@ TOOL_CALL: tool_name|param1=value1|param2=value2
         model: Optional[str] = None
     ) -> AsyncIterator[str]:
         """处理用户消息（流式）"""
+        # 处理附件
+        messages = self._process_attachments(messages)
+        
         user_message = messages[-1]["content"] if messages else ""
         
         # 处理长对话

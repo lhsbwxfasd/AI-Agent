@@ -40,6 +40,18 @@ class ChartDetector:
         """
         text_lower = text.lower()
         
+        # 排除附件图片相关的问题（不是要生成图表）
+        exclude_keywords = [
+            '附件图', '上传图', '图片', '图像', '截图', '照片',
+            '识别图', '提取图', '解析图', '分析图', '看图',
+            '图片中', '图像中', '图中', '照片中',
+            'attachment', 'image', 'photo', 'picture'
+        ]
+        
+        # 如果包含排除关键词，说明不是要生成图表
+        if any(keyword in text_lower for keyword in exclude_keywords):
+            return False, None, None
+        
         has_chart_keyword = any(keyword in text_lower for keyword in self.chart_keywords)
         
         if not has_chart_keyword:

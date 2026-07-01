@@ -2,10 +2,15 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# 安装系统依赖
+# 安装系统依赖和 Tesseract OCR
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    tesseract-ocr \
+    tesseract-ocr-chi-sim \
+    tesseract-ocr-chi-tra \
+    tesseract-ocr-eng \
+    libtesseract-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 复制依赖文件
@@ -18,7 +23,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 创建数据目录
-RUN mkdir -p data/chroma logs
+RUN mkdir -p data/chroma data/attachments logs
 
 # 暴露端口
 EXPOSE 8000

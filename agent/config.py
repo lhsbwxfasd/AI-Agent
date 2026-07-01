@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     # LLM 配置
     openai_api_key: str
     openai_base_url: str = "https://api.deepseek.com"
-    default_model: str = "deepseek-chat"
+    default_model: str = "deepseek-r1:7b"
     default_temperature: float = 0.7
     max_tokens: int = 2000
     

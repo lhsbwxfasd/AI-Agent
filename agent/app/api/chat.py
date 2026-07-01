@@ -32,7 +32,7 @@ async def list_models():
         models = llm_service.get_available_models()
         return {
             "models": models,
-            "default": "deepseek-chat"
+            "default": "deepseek-r1:7b"
         }
     except Exception as e:
         logger.error(f"Error listing models: {str(e)}")
@@ -64,14 +64,19 @@ async def chat_completion(
                     conversation_id=conversation_id,
                     max_history=None
                 )
-                # 添加当前用户消息到历史
-                messages_dict.append({"role": "user", "content": request.messages[-1].content})
+                # 添加当前用户消息到历史（包含附件）
+                last_message = request.messages[-1].dict()
+                messages_dict.append({
+                    "role": "user", 
+                    "content": last_message["content"],
+                    "attachments": last_message.get("attachments")
+                })
                 
                 # 保存用户消息
                 await conversation_service.add_message(
                     conversation_id=conversation_id,
                     role="user",
-                    content=request.messages[-1].content
+                    content=last_message["content"]
                 )
         else:
             # 创建新会话
@@ -132,14 +137,20 @@ async def chat_completion_stream(
                     conversation_id=conversation_id,
                     max_history=None
                 )
-                # 添加当前用户消息到历史
-                messages_dict.append({"role": "user", "content": request.messages[-1].content})
+                # 添加当前用户消息到历史（包含附件）
+                last_message = request.messages[-1].dict()
+                messages_dict.append({
+                    "role": "user", 
+                    "content": last_message["content"],
+                    "attachments": last_message.get("attachments")
+                })
                 
-                # 保存用户消息
+                # 保存用户消息（包含附件）
                 await conversation_service.add_message(
                     conversation_id=conversation_id,
                     role="user",
-                    content=request.messages[-1].content
+                    content=last_message["content"],
+                    attachments=last_message.get("attachments")
                 )
         else:
             # 创建新会话

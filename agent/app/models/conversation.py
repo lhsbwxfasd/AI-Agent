@@ -1,12 +1,21 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from datetime import datetime
+
+
+class MessageAttachment(BaseModel):
+    """消息附件"""
+    id: str = Field(..., description="附件ID")
+    filename: str = Field(..., description="文件名")
+    content_type: str = Field(..., description="文件类型")
+    size: int = Field(..., description="文件大小")
 
 
 class Message(BaseModel):
     role: str = Field(..., description="消息角色：user/assistant/system")
     content: str = Field(..., description="消息内容")
     timestamp: datetime = Field(default_factory=datetime.utcnow, description="消息时间戳")
+    attachments: Optional[List[MessageAttachment]] = Field(default=None, description="附件列表")
 
 
 class ConversationCreate(BaseModel):

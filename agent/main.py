@@ -13,7 +13,7 @@ os.environ['HUGGINGFACE_HUB_CACHE'] = os.path.expanduser('~/.cache/huggingface/h
 # 修复 sqlite3 版本问题（必须在导入 chromadb 之前）
 from app.utils.sqlite3_patch import *
 
-from app.api import chat, knowledge, auth, conversation
+from app.api import chat, knowledge, auth, conversation, attachment
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.auth import AuthMiddleware
 from app.utils.logger import setup_logger
@@ -72,6 +72,7 @@ def create_app() -> FastAPI:
     app.include_router(chat.router, prefix="/api/v1/chat", tags=["聊天"])
     app.include_router(knowledge.router, prefix="/api/v1/knowledge", tags=["知识库"])
     app.include_router(conversation.router, prefix="/api/v1/conversations", tags=["会话管理"])
+    app.include_router(attachment.router, prefix="/api/v1/attachments", tags=["附件管理"])
     
     # 健康检查
     @app.get("/health")
