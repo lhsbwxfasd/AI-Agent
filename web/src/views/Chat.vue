@@ -1,6 +1,6 @@
 <template>
   <div class="chat-container">
-    <el-container>
+    <el-container class="chat-el-container">
       <!-- Sidebar -->
       <el-aside width="260px" class="sidebar">
         <div class="sidebar-header">
@@ -97,95 +97,100 @@
               </div>
             </div>
           </div>
-        </el-main>
-        
-        <!-- Bottom Input -->
-        <el-footer class="chat-footer" height="auto">
-          <div class="input-container">
-            <div class="input-wrapper">
-              <div class="input-top">
-                <el-button 
-                  :class="['feature-btn', { active: deepThinking }]"
-                  @click="deepThinking = !deepThinking"
-                  size="small"
-                >
-                  <el-icon><Cpu /></el-icon>
-                  深度思考
-                </el-button>
-                <el-button 
-                  :class="['feature-btn', { active: smartSearch }]"
-                  @click="smartSearch = !smartSearch"
-                  size="small"
-                >
-                  <el-icon><Search /></el-icon>
-                  智能搜索
-                </el-button>
-              </div>
-              <div class="input-main">
-                <div v-if="attachments.length > 0" class="attachments-preview">
-                  <div 
-                    v-for="(attachment, index) in attachments" 
-                    :key="index"
-                    class="attachment-item"
-                  >
-                    <el-icon><Document /></el-icon>
-                    <span class="attachment-name">{{ attachment.filename }}</span>
-                    <el-icon class="remove-attachment" @click="removeAttachment(index)">
-                      <Close />
-                    </el-icon>
-                  </div>
-                </div>
-                <el-input
-                  v-model="inputMessage"
-                  type="textarea"
-                  :rows="1"
-                  :autosize="{ minRows: 1, maxRows: 6 }"
-                  placeholder="给 AI Assistant 发送消息"
-                  @keydown.enter.ctrl="handleSend"
-                  :disabled="chatStore.isLoading"
-                  class="message-input"
+
+          <!-- Bottom Input -->
+          <el-footer class="chat-footer" height="auto">
+            <div class="model-selector-wrapper">
+              <el-select
+                v-model="chatStore.currentModel"
+                placeholder="选择模型"
+                @change="handleModelChange"
+                size="small"
+                class="model-selector"
+              >
+                <el-option
+                  v-for="(model, key) in chatStore.models"
+                  :key="key"
+                  :label="model.name"
+                  :value="key"
                 />
-                <div class="input-actions">
-                  <input 
-                    ref="fileInput"
-                    type="file"
-                    style="display: none"
-                    @change="handleFileSelect"
-                    accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp"
+              </el-select>
+            </div>
+            <div class="input-container">
+              <div class="input-wrapper">
+                
+                <div class="input-main">
+                  <div v-if="attachments.length > 0" class="attachments-preview">
+                    <div 
+                      v-for="(attachment, index) in attachments" 
+                      :key="index"
+                      class="attachment-item"
+                    >
+                      <el-icon><Document /></el-icon>
+                      <span class="attachment-name">{{ attachment.filename }}</span>
+                      <el-icon class="remove-attachment" @click="removeAttachment(index)">
+                        <Close />
+                      </el-icon>
+                    </div>
+                  </div>
+                  <el-input
+                    v-model="inputMessage"
+                    type="textarea"
+                    :rows="2"
+                    :autosize="{ minRows: 2, maxRows: 6 }"
+                    placeholder="给 AI Assistant 发送消息"
+                    @keydown.enter.ctrl="handleSend"
+                    :disabled="chatStore.isLoading"
+                    class="message-input"
                   />
-                  <el-button class="action-btn" circle @click="triggerFileUpload">
-                    <el-icon><Paperclip /></el-icon>
+                  
+                </div>
+                <div class="input-top">
+                  <el-button 
+                    :class="['feature-btn', { active: deepThinking }]"
+                    @click="deepThinking = !deepThinking"
+                    size="small"
+                  >
+                    <el-icon><Cpu /></el-icon>
+                    深度思考
                   </el-button>
                   <el-button 
-                    class="send-btn" 
-                    circle
-                    @click="handleSend"
-                    :disabled="(!inputMessage.trim() && attachments.length === 0) || chatStore.isLoading"
+                    :class="['feature-btn', { active: smartSearch }]"
+                    @click="smartSearch = !smartSearch"
+                    size="small"
                   >
-                    <el-icon><Top /></el-icon>
+                    <el-icon><Search /></el-icon>
+                    智能搜索
                   </el-button>
+
+                  <div class="input-actions">
+                    <input 
+                      ref="fileInput"
+                      type="file"
+                      style="display: none"
+                      @change="handleFileSelect"
+                      accept=".pdf,.docx,.txt,.jpg,.jpeg,.png,.gif,.webp"
+                    />
+                    <el-button class="action-btn" circle @click="triggerFileUpload">
+                      <el-icon><Paperclip /></el-icon>
+                    </el-button>
+                    <el-button 
+                      class="send-btn" 
+                      circle
+                      @click="handleSend"
+                      :disabled="(!inputMessage.trim() && attachments.length === 0) || chatStore.isLoading"
+                    >
+                      <el-icon><Top /></el-icon>
+                    </el-button>
+                  </div>
                 </div>
               </div>
             </div>
-            <div class="input-notice">内容由 AI 生成, 请仔细甄别</div>
-          </div>
-          <div class="model-selector-wrapper">
-            <el-select
-              v-model="chatStore.currentModel"
-              placeholder="选择模型"
-              @change="handleModelChange"
-              size="small"
-              class="model-selector"
-            >
-              <el-option
-                v-for="(model, key) in chatStore.models"
-                :key="key"
-                :label="model.name"
-                :value="key"
-              />
-            </el-select>
-          </div>
-        </el-footer>
+            
+          </el-footer>
+        </el-main>
+        
+        
       </el-container>
     </el-container>
   </div>
@@ -473,8 +478,11 @@ watch(() => chatStore.messages, () => {
 
 <style scoped>
 .chat-container {
-  height: 100vh;
+  height: 100%;
   background-color: #F8F9FA;
+}
+.chat-el-container {
+  height: 100%;
 }
 
 .sidebar {
@@ -581,6 +589,7 @@ watch(() => chatStore.messages, () => {
 .main-container {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .top-header {
@@ -656,13 +665,15 @@ watch(() => chatStore.messages, () => {
 .main-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 40px;
-  background-color: #F8F9FA;
+  padding: 0;
+  background-color: #fff;
+  position: relative;
 }
 
 .chat-messages {
   max-width: 900px;
   margin: 0 auto;
+  min-height: calc(50% - 100px);
 }
 
 .message {
@@ -699,8 +710,9 @@ watch(() => chatStore.messages, () => {
 
 .chat-footer {
   background-color: #FFFFFF;
-  border-top: 1px solid #E8EAED;
   padding: 16px 24px 20px;
+  bottom: 0;
+  position: sticky;
 }
 
 .input-container {
@@ -719,7 +731,7 @@ watch(() => chatStore.messages, () => {
 .input-top {
   display: flex;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-top: 12px;
 }
 
 .feature-btn {
@@ -798,10 +810,11 @@ watch(() => chatStore.messages, () => {
   line-height: 1.6;
   padding: 0;
   background-color: transparent;
+  box-shadow: none !important;
 }
 
 .message-input :deep(.el-textarea__inner):focus {
-  box-shadow: none;
+  box-shadow: none !important;
 }
 
 .input-actions {
@@ -849,9 +862,8 @@ watch(() => chatStore.messages, () => {
 
 .model-selector-wrapper {
   max-width: 900px;
-  margin: 12px auto 0;
+  margin: 10px auto;
   display: flex;
-  justify-content: center;
 }
 
 .model-selector {
